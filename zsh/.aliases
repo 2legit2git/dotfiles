@@ -1,0 +1,90 @@
+#!/bin/zsh
+# =============================================================================
+# NAVIGATION & LISTING (Eza)
+# =============================================================================
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .2='cd ../..'
+alias .3='cd ../../..'
+alias .4='cd ../../../..'
+alias .5='cd ../../../../..'
+
+# Eza (Modern ls)
+# Note: --git flag shows git status in file list
+alias ls='eza --icons --group-directories-first'
+alias l='eza -lahF --icons --git --no-user'
+alias ll='eza -lFh --icons --git --group-directories-first'
+alias la='eza -alFh --icons --group-directories-first'
+alias lt='eza --tree --level=2 --icons'  # Tree view (2 levels deep)
+alias lsn='eza | cat -n'                  # List with line numbers
+
+# =============================================================================
+# FILE OPERATIONS & SAFETY
+# =============================================================================
+alias mkdir='mkdir -p -v'
+alias cp='cp --preserve=all -v'
+alias cpr='cp --preserve=all -R -v'
+alias mv='mv -v'
+alias rm='rm -I' # Prompts once before removing more than 3 files
+alias cpp='rsync -ahW --info=progress2' # Copy with Progress Bar
+alias untar='tar -zxvf'
+alias wget='wget -c'
+alias count='find . -type f | wc -l'
+alias fndlrg='find . -type f -exec du -h {} + | sort -rh | head -10' # Find top 10 largest files
+
+# =============================================================================
+# SYSTEM & MAINTENANCE
+# =============================================================================
+alias c='clear'
+alias cs='printf "\033c"' # Hard clear (clears scrollback)
+alias q='exit'
+alias update='sudo apt update && sudo apt upgrade -y'
+alias timenow='date +"%T"'
+alias datenow='date +"%d-%m-%Y"'
+
+# Resources
+alias free='free -mth'
+alias psa='ps auxf'
+# alias cputemp='sensors | grep Core' # Requires lm-sensors package
+
+# =============================================================================
+# CONFIGURATION MANAGEMENT (Dotfiles)
+# =============================================================================
+alias sz='source ~/.zshrc'
+alias m='micro'
+
+# Direct edit links (Updated for your Stow setup)
+alias edit='micro ~/dotfiles/setup.yml'
+alias editz='micro ~/dotfiles/zsh/.zshrc'
+alias edita='micro ~/dotfiles/zsh/.aliases'
+alias editstar='micro ~/dotfiles/starship/.config/starship.toml'
+
+# =============================================================================
+# PYTHON & DEV
+# =============================================================================
+alias p='python3'
+alias py='python3'
+alias phttp='python3 -m http.server 8000'
+
+# Virtual Environment
+alias venva='source .venv/bin/activate'
+alias venvd='deactivate'
+alias venvmake='python3 -m venv .venv'
+
+# =============================================================================
+# NETWORKING
+# =============================================================================
+# Get Public IP
+alias myip='curl -s https://ifconfig.me'
+# Get Local LAN IP
+alias localip="ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1"
+
+# =============================================================================
+# LEGACY / SCRIPTS (Check paths before using on new server)
+# =============================================================================
+# alias ngrok='~/ngrok'
+# alias bak='python ~/scripts/make-backup.py'
+# alias combine='python ~/scripts/combine.py'
+# alias extract='bash ~/scripts/extract.sh'
+# alias smslist='termux-sms-list' # Termux only

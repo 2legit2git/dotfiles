@@ -1,0 +1,20 @@
+---
+# Step 1: Run the standard setup
+- import_playbook: common.yml
+
+# Step 2: Add Docker specific configuration
+- name: Install Docker
+  hosts: localhost
+  connection: local
+  become: true
+  
+  tasks:
+    - name: Install Docker Dependencies
+      apt:
+        name:
+          - ca-certificates
+          - gnupg
+        state: present
+
+    - name: Add Docker GPG Key
+      # (Docker install steps go here...)

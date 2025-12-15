@@ -1,0 +1,103 @@
+---
+- name: Workstation Setup (Ubuntu + OMZ)
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    user: "{{ lookup('env', 'USER') }}"
+    home: /home/{{ lookup('env', 'USER') }}
+    dotfiles_dir: /home/{{ lookup('env', 'USER') }}/dotfiles
+    omz_dir: '{{ home }}/.oh-my-zsh'
+  tasks:
+    # --- 2. INSTALL PACKAGES ---
+    - name: Install Core Packages
+      apt:
+        name:
+          - zsh
+          - git
+          - stow
+          - curl
+          - fzf
+          - micro
+          - tealdeer  # tldr
+          - fd-find # Ubuntu name for 'fd'
+          - ripgrep
+          - most
+          - tree
+          - ncdu
+          - bat
+        state: present
+        update_cache: true
+
+    # --- 3. FIX UBUNTU BINARY NAMES ---
+    - name: Link 'fd' to 'fdfind'
+      file:
+        src: /usr/bin/fdfind
+        dest: /usr/local/bin/fd
+        state: link
+    - name: Link 'bat' to 'batcat'
+      file:
+        src: /usr/bin/batcat
+        dest: /usr/local/bin/bat
+        state: link
+
+    # --- 4. INSTALL ZOXIDE & STARSHIP ---
+    - name: Install Zoxide
+      shell: curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh
+        | bash
+      args:
+        creates: '{{ home }}/.local/bin/zoxide'
+      become: false
+    - name: Install Starship
+      shell: curl -sS https://starship.rs/install.sh | sh -s -- -y
+      args:
+        creates: /usr/local/bin/starship
+      become: true
+
+    # --- 5. INSTALL OH MY ZSH ---
+    - name: Check if Oh My Zsh is installed
+      stat:
+        path: '{{ omz_dir }}'
+      register: omz_stat
+    - name: Install Oh My Zsh (Unattended)
+      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        "" --unattended
+      when: not omz_stat.stat.exists
+      become: false
+    - name: Remove default .zshrc created by OMZ
+      file:
+        path: '{{ home }}/.zshrc'
+        state: absent
+      when: not omz_stat.stat.exists
+      # We delete this so Stow can link YOUR version
+
+    # --- 6. INSTALL ZSH PLUGINS ---
+    - name: Install Zsh Autosuggestions
+      git:
+        repo: https://github.com/zsh-users/zsh-autosuggestions
+        dest: '{{ omz_dir }}/custom/plugins/zsh-autosuggestions'
+      become: false
+    - name: Install Zsh Syntax Highlighting
+      git:
+        repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+        dest: '{{ omz_dir }}/custom/plugins/zsh-syntax-highlighting'
+      become: false
+    - name: Install Zsh You Should Use
+      git:
+        repo: https://github.com/MichaelAquilina/zsh-you-should-use.git
+        dest: '{{ omz_dir }}/custom/plugins/zsh-you-should-use'
+      become: false
+
+    # --- 7. STOW DOTFILES ---
+    - name: Stow Config Files
+      shell: stow -v -R -t {{ home }} {{ item }}
+      args:
+        chdir: '{{ dotfiles_dir }}'
+      loop: [zsh, micro, starship]
+      become: false
+
+    # --- 8. FINALIZE ---
+    - name: Change User Shell to Zsh
+      user:
+        name: '{{ user }}'
+        shell: /usr/bin/zsh

@@ -1,0 +1,50 @@
+format = """
+$hostname \
+$directory\
+$git_branch\
+$git_status\
+$line_break\
+$character
+"""
+
+# ---------------------------------
+# Hostname FIRST in prompt
+# ---------------------------------
+[hostname]
+format = "[$hostname](fg:#ff4ddd)"
+style = "bold"
+
+[custom.hostcolor]
+command = 'echo $HOSTNAME'
+when = 'true'
+format = "[🖥 $output](fg:$env.HOST_COLOR)"
+
+
+# ---------------------------------
+# Directory (cyan)
+# ---------------------------------
+[directory]
+style = "fg:#8be9fd"
+format = "[$path]($style) "
+
+# ---------------------------------
+# Git branch (pink)
+# ---------------------------------
+[git_branch]
+style = "fg:#ff79c6"
+format = "([$symbol$branch]($style)) "
+
+# ---------------------------------
+# Git status (yellow-ish)
+# ---------------------------------
+[git_status]
+style = "fg:#f1fa8c"
+format = "([$all_status]($style)) "
+
+# ---------------------------------
+# Prompt character
+# ---------------------------------
+[character]
+success_symbol = "[❯](fg:#00f5d4)"
+error_symbol = "[❯](fg:red)"
+vicmd_symbol = "[❮](fg:#00f5d4)"

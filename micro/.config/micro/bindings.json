@@ -1,0 +1,6 @@
+{
+    "Alt-/": "lua:comment.comment",
+    "Ctrl-f": "FindLiteral",
+    "Ctrl-u": "Paste",
+    "CtrlUnderscore": "lua:comment.comment"
+}
