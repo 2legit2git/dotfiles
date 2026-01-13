@@ -23,21 +23,19 @@ ansible-playbook ~/dotfiles/common.yml --ask-become-pass
 
 3. Link Dotfiles & Finalize
 Link your config files and switch your shell to Zsh.
-# Link config files (Stow)
-cd ~/dotfiles
-stow -R */
 
-# Install Eza (Modern ls replacement)
+# Install Eza
 sudo apt install -y eza
 
 # Switch shell to Zsh
 chsh -s $(which zsh)
 
-# Log out and back in for changes to take effect
+# Log out for changes to take effect
 exit
 
-💡 Pro Tip: The "One-Liner"
+#The "One-Liner"
 If you have already authenticated gh, you can paste this block to do everything at once:
+
 git clone git@github.com:2legit2git/dotfiles.git && \
 sudo apt install -y ansible && \
 ansible-playbook ~/dotfiles/common.yml --ask-become-pass && \
