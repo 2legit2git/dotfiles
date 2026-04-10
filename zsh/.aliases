@@ -12,7 +12,6 @@ alias .5='cd ../../../../..'
 
 # Eza (Modern ls)
 # Note: --git flag shows git status in file list
-#alias ls='eza --icons --group-directories-first'
 alias l='eza -lahF --icons --git --no-user --group-directories-first'
 alias ll='eza -lFh --icons --git --group-directories-first'
 alias la='eza -alFh --icons --group-directories-first'
@@ -55,7 +54,6 @@ alias sz='source ~/.zshrc'
 alias m='micro'
 
 # Direct edit links (Updated for your Stow setup)
-alias edit='micro ~/dotfiles/setup.yml'
 alias editz='micro ~/dotfiles/zsh/.zshrc'
 alias edita='micro ~/dotfiles/zsh/.aliases'
 alias editstar='micro ~/dotfiles/starship/.config/starship.toml'
@@ -81,10 +79,35 @@ alias myip='curl -s https://ifconfig.me'
 alias localip="ip -4 addr show | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1"
 
 # =============================================================================
-# LEGACY / SCRIPTS (Check paths before using on new server)
+# ARCHIVE UTILITIES
 # =============================================================================
-# alias ngrok='~/ngrok'
-# alias bak='python ~/scripts/make-backup.py'
-# alias combine='python ~/scripts/combine.py'
-# alias extract='bash ~/scripts/extract.sh'
-# alias smslist='termux-sms-list' # Termux only
+# Create zip archive
+mkzip() {
+    if [ -z "$1" ]; then
+        echo "Usage: mkzip <path> [archive-name.zip]"
+        return 1
+    fi
+    local src="$1"
+    local out="${2:-$(basename "$src").zip}"
+    zip -r "$out" "$src"
+}
+
+# Extract almost anything
+extract() {
+    if [ -z "$1" ]; then
+        echo "Usage: extract <archive>"
+        return 1
+    fi
+
+    case "$1" in
+        *.zip) unzip "$1" ;;
+        *.tar.gz|*.tgz) tar -xzf "$1" ;;
+        *.tar.bz2|*.tbz2) tar -xjf "$1" ;;
+        *.tar.xz|*.txz) tar -xJf "$1" ;;
+        *.tar) tar -xf "$1" ;;
+        *.gz) gunzip "$1" ;;
+        *.bz2) bunzip2 "$1" ;;
+        *.xz) unxz "$1" ;;
+        *) echo "Don't know how to extract '$1'" ; return 1 ;;
+    esac
+}

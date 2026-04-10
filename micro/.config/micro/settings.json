@@ -13,5 +13,8 @@
   "showchars": ",ispace=|",
   "softwrap": true,
   "tabsize": 2,
-  "tabstospaces": true
+  "tabstospaces": true,
+    "pluginrepos": [
+      "https://raw.githubusercontent.com/gamemaker1/micro-plugin-prettier/main/repo.json"
+    ]
 }
