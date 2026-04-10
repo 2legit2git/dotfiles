@@ -3,15 +3,20 @@
   hosts: localhost
   connection: local
   become: true
+
   vars:
     user: "{{ lookup('env', 'USER') }}"
-    home: /home/{{ lookup('env', 'USER') }}
-    dotfiles_dir: /home/{{ lookup('env', 'USER') }}/dotfiles
-    omz_dir: '{{ home }}/.oh-my-zsh'
+    home: "/home/{{ lookup('env', 'USER') }}"
+    dotfiles_dir: "{{ home }}/dotfiles"
+    omz_dir: "{{ home }}/.oh-my-zsh"
+    timezone_name: "America/New_York"
+    micro_plugins:
+      - prettier
+
   tasks:
-    # --- 2. INSTALL PACKAGES ---
+    # --- 1. CORE PACKAGES ---
     - name: Install Core Packages
-      apt:
+      ansible.builtin.apt:
         name:
           - zsh
           - git
@@ -19,85 +24,146 @@
           - curl
           - fzf
           - micro
-          - tealdeer  # tldr
-          - fd-find # Ubuntu name for 'fd'
+          - fd-find
           - ripgrep
           - most
           - tree
           - ncdu
           - bat
+          - tmux
+          - rsync
+          - iputils-ping
+          - dnsutils
+          - net-tools
+          - nmap
+          - htop
+          - btop
+          - zip
+          - unzip
+          - jq
+          - ca-certificates
+          - npm
         state: present
         update_cache: true
 
-    # --- 3. FIX UBUNTU BINARY NAMES ---
-    - name: Link 'fd' to 'fdfind'
-      file:
+    - name: Ensure ~/bin exists
+      ansible.builtin.file:
+        path: "{{ home }}/bin"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: "0755"
+
+    # --- 2. FIX UBUNTU BINARY NAMES ---
+    - name: Link fd to fdfind
+      ansible.builtin.file:
         src: /usr/bin/fdfind
         dest: /usr/local/bin/fd
         state: link
-    - name: Link 'bat' to 'batcat'
-      file:
+
+    - name: Link bat to batcat
+      ansible.builtin.file:
         src: /usr/bin/batcat
         dest: /usr/local/bin/bat
         state: link
 
-    # --- 4. INSTALL ZOXIDE & STARSHIP ---
+    # --- 3. INSTALL ZOXIDE / STARSHIP / TLDR ---
     - name: Install Zoxide
-      shell: curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh
-        | bash
+      ansible.builtin.shell: |
+        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
       args:
-        creates: '{{ home }}/.local/bin/zoxide'
+        creates: "{{ home }}/.local/bin/zoxide"
       become: false
+
     - name: Install Starship
-      shell: curl -sS https://starship.rs/install.sh | sh -s -- -y
+      ansible.builtin.shell: |
+        curl -sS https://starship.rs/install.sh | sh -s -- -y
       args:
         creates: /usr/local/bin/starship
-      become: true
 
-    # --- 5. INSTALL OH MY ZSH ---
+    - name: Install tealdeer from upstream
+      ansible.builtin.get_url:
+        url: https://github.com/tealdeer-rs/tealdeer/releases/latest/download/tealdeer-linux-x86_64-musl
+        dest: /usr/local/bin/tldr
+        mode: "0755"
+        force: true
+
+    # --- 4. OH MY ZSH ---
     - name: Check if Oh My Zsh is installed
-      stat:
-        path: '{{ omz_dir }}'
+      ansible.builtin.stat:
+        path: "{{ omz_dir }}"
       register: omz_stat
-    - name: Install Oh My Zsh (Unattended)
-      shell: sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-        "" --unattended
+
+    - name: Install Oh My Zsh unattended
+      ansible.builtin.shell: |
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
       when: not omz_stat.stat.exists
       become: false
-    - name: Remove default .zshrc created by OMZ
-      file:
-        path: '{{ home }}/.zshrc'
+
+    - name: Remove default .zshrc created by Oh My Zsh
+      ansible.builtin.file:
+        path: "{{ home }}/.zshrc"
         state: absent
       when: not omz_stat.stat.exists
-      # We delete this so Stow can link YOUR version
 
-    # --- 6. INSTALL ZSH PLUGINS ---
-    - name: Install Zsh Autosuggestions
-      git:
+    # --- 5. ZSH PLUGINS ---
+    - name: Install zsh-autosuggestions
+      ansible.builtin.git:
         repo: https://github.com/zsh-users/zsh-autosuggestions
-        dest: '{{ omz_dir }}/custom/plugins/zsh-autosuggestions'
+        dest: "{{ omz_dir }}/custom/plugins/zsh-autosuggestions"
       become: false
-    - name: Install Zsh Syntax Highlighting
-      git:
+
+    - name: Install zsh-syntax-highlighting
+      ansible.builtin.git:
         repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
-        dest: '{{ omz_dir }}/custom/plugins/zsh-syntax-highlighting'
+        dest: "{{ omz_dir }}/custom/plugins/zsh-syntax-highlighting"
       become: false
-    - name: Install Zsh You Should Use
-      git:
-        repo: https://github.com/MichaelAquilina/zsh-you-should-use.git
-        dest: '{{ omz_dir }}/custom/plugins/zsh-you-should-use'
-      become: false
+
+    # --- 6. SYSTEM SETTINGS ---
+    - name: Set timezone
+      ansible.builtin.command: timedatectl set-timezone {{ timezone_name }}
+      changed_when: false
 
     # --- 7. STOW DOTFILES ---
-    - name: Stow Config Files
-      shell: stow -v -R -t {{ home }} {{ item }}
+    - name: Stow config packages
+      ansible.builtin.command: stow -v -R -t {{ home }} {{ item }}
       args:
-        chdir: '{{ dotfiles_dir }}'
-      loop: [zsh, micro, starship]
+        chdir: "{{ dotfiles_dir }}"
+      loop:
+        - git
+        - micro
+        - prettier
+        - starship
+        - tmux
+        - yamllint
+        - zsh
       become: false
 
-    # --- 8. FINALIZE ---
-    - name: Change User Shell to Zsh
-      user:
-        name: '{{ user }}'
+    # --- 8. PRETTIER + MICRO PLUGIN ---
+    - name: Check if Prettier is installed globally
+      ansible.builtin.command: npm list -g prettier
+      register: prettier_check
+      failed_when: false
+      changed_when: false
+
+    - name: Install Prettier globally
+      ansible.builtin.command: npm install -g prettier
+      when: prettier_check.rc != 0
+
+    - name: Check installed Micro plugins
+      ansible.builtin.command: micro -plugin list
+      register: micro_plugin_list
+      changed_when: false
+      become: false
+
+    - name: Install Micro plugins
+      ansible.builtin.command: micro --plugin install {{ item }}
+      loop: "{{ micro_plugins }}"
+      when: item not in micro_plugin_list.stdout
+      become: false
+
+    # --- 9. FINALIZE ---
+    - name: Change user shell to Zsh
+      ansible.builtin.user:
+        name: "{{ user }}"
         shell: /usr/bin/zsh
