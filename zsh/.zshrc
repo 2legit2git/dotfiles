@@ -2,9 +2,10 @@
 export ZSH="$HOME/.oh-my-zsh"
 export EDITOR="micro"
 export VISUAL="micro"
-# Ensure local bin is in path (for tools like zoxide/starship)
-export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"
+export SUDO_EDITOR="micro"
 
+export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/bin:/usr/local/go/bin:$PATH"
+export PATH="$PATH:$HOME/go/bin"
 # 2. THEME (Disabled because we use Starship)
 ZSH_THEME=""
 
@@ -14,8 +15,7 @@ plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
-  you-should-use
-  docker 
+  docker
   docker-compose
 )
 

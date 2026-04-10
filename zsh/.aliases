@@ -12,8 +12,8 @@ alias .5='cd ../../../../..'
 
 # Eza (Modern ls)
 # Note: --git flag shows git status in file list
-alias ls='eza --icons --group-directories-first'
-alias l='eza -lahF --icons --git --no-user'
+#alias ls='eza --icons --group-directories-first'
+alias l='eza -lahF --icons --git --no-user --group-directories-first'
 alias ll='eza -lFh --icons --git --group-directories-first'
 alias la='eza -alFh --icons --group-directories-first'
 alias lt='eza --tree --level=2 --icons'  # Tree view (2 levels deep)

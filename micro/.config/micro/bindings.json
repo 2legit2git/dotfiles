@@ -1,6 +1,8 @@
 {
-    "Alt-/": "lua:comment.comment",
-    "Ctrl-f": "FindLiteral",
-    "Ctrl-u": "Paste",
-    "CtrlUnderscore": "lua:comment.comment"
+  "Alt-/": "lua:comment.comment",
+  "Ctrl-f": "FindLiteral",
+  "Ctrl-u": "Paste",
+  "Ctrl-k": "CutLine",
+  "CtrlUnderscore": "lua:comment.comment",
+  "F6": "command-edit:gorename "
 }

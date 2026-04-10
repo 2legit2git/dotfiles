@@ -1,12 +1,17 @@
 {
-    "autosu": true,
-    "clipboard": "terminal",
-    "colorscheme": "monokai",
-    "hlsearch": true,
-    "mkparents": true,
-    "savecursor": true,
-    "saveundo": true,
-    "softwrap": true,
-    "tabsize": 2,
-    "tabstospaces": true
+  "autosu": true,
+  "clipboard": "terminal",
+  "colorscheme": "monokai",
+  "fmtonsave": true,
+  "format": true,
+  "hlsearch": true,
+  "mkparents": true,
+  "prettier.prettierPath": "/usr/local/bin/prettier",
+  "rmtrailingws": true,
+  "savecursor": true,
+  "saveundo": true,
+  "showchars": ",ispace=|",
+  "softwrap": true,
+  "tabsize": 2,
+  "tabstospaces": true
 }
