@@ -55,7 +55,7 @@ alias m='micro'
 
 # Direct edit links (Updated for your Stow setup)
 alias editz='micro ~/dotfiles/zsh/.zshrc'
-alias edita='micro ~/dotfiles/zsh/.aliases'
+alias editalias='micro ~/dotfiles/zsh/.aliases'
 alias editstar='micro ~/dotfiles/starship/.config/starship.toml'
 
 # =============================================================================
